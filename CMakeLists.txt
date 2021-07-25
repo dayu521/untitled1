@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.16)
 
 project(untitled1 LANGUAGES CXX)
 
@@ -22,22 +22,32 @@ add_executable(untitled1
 #    xxbb.cpp
     main.cpp   
     )
+add_executable(test_yield test_yield.cpp)
+
+target_compile_features(untitled1 PRIVATE cxx_std_20)
+target_compile_options(untitled1 PRIVATE -fcoroutines)
+target_compile_options(untitled1 PRIVATE -pthread)
+target_link_options(untitled1 PRIVATE -pthread)
+
+enable_testing()
+add_test(NAME test_untitled1 COMMAND untitled1)
+add_test(NAME test_yield COMMAND test_yield)
 #add_subdirectory(doctest)
 
-add_library(smallobj SmallObj.cpp)
-target_include_directories(smallobj PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+#add_library(smallobj SmallObj.cpp)
+#target_include_directories(smallobj PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
-add_executable(mytest
+#add_executable(mytest
 #    test2.cpp
 #    test_allocator.cpp
 #    test_threadlocal.cpp
-    test_bst.cpp)
+#    test_bst.cpp)
 
-target_compile_options(mytest PRIVATE -pthread)
-target_link_options(mytest PRIVATE -pthread)
+#target_compile_options(mytest PRIVATE -pthread)
+#target_link_options(mytest PRIVATE -pthread)
 
-target_link_libraries(mytest PRIVATE doctest_with_main)
-target_link_libraries(mytest PRIVATE smallobj)
+#target_link_libraries(mytest PRIVATE doctest_with_main)
+#target_link_libraries(mytest PRIVATE smallobj)
 
 #target_link_libraries(${PROJECT_NAME} pthread)
 #add_custom_target(clangformat
