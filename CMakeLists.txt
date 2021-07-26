@@ -18,16 +18,15 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 #include_directories(${CMAKE_CURRENT_SOURCE_DIR}/cista/include)
 # ...
 
+add_compile_options(-pthread -fcoroutines)
+add_link_options(-pthread)
+add_compile_definitions(COROUTINENEEDWRAP)
+
 add_executable(untitled1
 #    xxbb.cpp
     main.cpp   
     )
 add_executable(test_yield test_yield.cpp)
-
-target_compile_features(untitled1 PRIVATE cxx_std_20)
-target_compile_options(untitled1 PRIVATE -fcoroutines)
-target_compile_options(untitled1 PRIVATE -pthread)
-target_link_options(untitled1 PRIVATE -pthread)
 
 enable_testing()
 add_test(NAME test_untitled1 COMMAND untitled1)

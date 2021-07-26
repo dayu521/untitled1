@@ -2,7 +2,11 @@
 #include <optional>
 #include <ranges>
 
+#ifdef COROUTINENEEDWRAP
 #include"coroutine_wrap.h"
+#else
+#include<coroutine>
+#endif
 
 //int operator +(int,int);
 
@@ -12,36 +16,30 @@ auto operator co_await(std::suspend_always&& s) noexcept
     return std::move(s);
 }
 
-struct msuspend_always
-{
-  constexpr bool await_ready() const noexcept { return false; }
-
-  constexpr void await_suspend(std::coroutine_handle<>) const noexcept {}
-
-  void await_resume() const noexcept
-    {
-        std::cout<<"can we get here?"<<std::endl;
-    }
-};
-
 template<typename T> requires std::movable<T>
 class Generator {
 public:
     struct promise_type {
         Generator<T> get_return_object() {
+            std::cout<<"get_return_object"<<std::endl;
             return Generator{Handle::from_promise(*this)};
         }
-        static msuspend_always initial_suspend() noexcept {
+        static std::suspend_always initial_suspend() noexcept {
+            std::cout<<"initial_suspend"<<std::endl;
             return {};
         }
-        static msuspend_always final_suspend() noexcept {
+        static std::suspend_always final_suspend() noexcept {
+            std::cout<<"final_suspend"<<std::endl;
             return {};
         }
-        msuspend_always yield_value(T value) noexcept {
+        std::suspend_always yield_value(T value) noexcept {
+            std::cout<<"yield_value"<<std::endl;
             current_value = std::move(value);
             return {};
         }
-        constexpr void return_void() const {}
+        constexpr void return_void() const {
+            std::cout<<"return_void"<<std::endl;
+        }
         // 生成器协程中不允许 co_await 。
         void await_transform() = delete;
         static void unhandled_exception() {
@@ -112,7 +110,7 @@ public:
         return {};
     }
 
-private:
+public:
     Handle m_coroutine;
 };
 
@@ -123,9 +121,27 @@ Generator<T> range(T first, T last) {
     }
 }
 
-int main() {
-    for (int i : range(-4, 8)) {
-        std::cout << i << ' ';
+struct CM
+{
+    CM()=default;
+    CM(const CM &)=default;
+    CM(CM &&){
+         std::cout<<"CM(CM &&)"<<std::endl;
     }
-    std::cout << '\n';
+    CM & operator =(const CM &)=default;
+};
+
+Generator<CM> ranges(CM c) {
+    co_yield c;
+    std::cout<<"ranges"<<std::endl;
+}
+
+int main() {
+//    for (int i : range(-4, 8)) {
+//        std::cout << i << ' '<<std::endl;
+//    }
+//    std::cout << '\n';
+    auto da=ranges({});
+    da.m_coroutine.resume();
+
 }

@@ -10,8 +10,11 @@
 
 #include <stdexcept>
 #include <thread>
-
+#ifdef COROUTINENEEDWRAP
 #include "coroutine_wrap.h"
+#else
+#include<coroutine>
+#endif
 
 template<typename T>
 struct Atraits
